@@ -3,7 +3,7 @@ namespace LINQ4PHP\Iterators;
 
 
 
-class LookupIterator extends LinqIterator implements \ArrayAccess{
+class LookupIterator extends LinqIterator implements \ArrayAccess {
 	private $getkey;
 	private $getelement;
 	private $lookup;
@@ -42,7 +42,7 @@ class LookupIterator extends LinqIterator implements \ArrayAccess{
 			if (!$keyfound ) {
 				$this->lookup[$ak] = new GroupIterator($ak, array());
 			} 
-			$this->lookup[$ak]->addElement($val);
+			$this->lookup[$ak]->addElement($element);
 			
 		}
 	}
@@ -57,10 +57,14 @@ class LookupIterator extends LinqIterator implements \ArrayAccess{
 		parent::__construct($this->lookup);
 	}
 	
-	public function Count() { 
-		return count($this->lookup);
+	public function Count($wherefunc = NULL) {
+		if (!$wherefunc) {
+            return count($this->lookup);
+        } else {
+            return parent::Count($wherefunc);
+        }
 	} 
-    public function Contains($key) {
+    public function ContainsKey($key) {
     	return $this->offsetExists($key);
     }
     

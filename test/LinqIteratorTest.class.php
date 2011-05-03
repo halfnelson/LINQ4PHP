@@ -195,9 +195,9 @@ class LinqIteratorTest extends PHPUnit_Framework_TestCase {
 		
 		$a = LINQ::Linq(array("one","two","three","four"));
 		$lu = $a->ToLookup(function($i){ return strlen($i); }, function($i){ return $i.'!';});
-		$this->AssertIteratorsEqual($lu[3],array("one","two"));
-		$this->AssertIteratorsEqual($lu[4],array("four"));
-		$this->AssertIteratorsEqual($lu[5],array("three"));
+		$this->AssertIteratorsEqual($lu[3],array("one!","two!"));
+		$this->AssertIteratorsEqual($lu[4],array("four!"));
+		$this->AssertIteratorsEqual($lu[5],array("three!"));
 		
 		//TODO: test comparer.
 	}
