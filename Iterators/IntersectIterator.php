@@ -1,5 +1,7 @@
 <?php
 namespace LINQ4PHP\Iterators;
+
+use LINQ4PHP\LINQ;
 class IntersectIterator extends DelayedExecutionIterator {
 	public $ismatch;
 	private $secondlist;
@@ -9,7 +11,7 @@ class IntersectIterator extends DelayedExecutionIterator {
 	function __construct($iterator, $intersectwith, $comparefunc = NULL) {
 		parent::__construct($iterator);
 		if (!$intersectwith instanceof LinqIterator) {
-			$this->secondlist = new LinqIterator($intersectwith);
+			$this->secondlist = LINQ::From($intersectwith);
 		} else {
 			$this->secondlist = $intersectwith;
 		}

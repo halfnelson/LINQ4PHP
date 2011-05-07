@@ -18,14 +18,13 @@ class GroupByIterator extends DelayedExecutionIterator {
 	}
 	
 	public function firstrun() {
-		$lookup = $this->aiterator->ToLookup($this->keyselect,$this->elementselect,$this->ismatch);
+		$lookup = new LookupIterator($this->aiterator,$this->keyselect,$this->elementselect,$this->ismatch);
 		if ($this->resultselect) {
 			$resultsel = $this->resultselect;
-			parent::__construct($lookup->Select(
-			   function($group) use ($resultsel) {
+			$lookup = new TransformIterator($lookup,function($group) use ($resultsel) {
 			   	   return call_user_func_array($resultsel,array($group->groupkey,$group));
-			   }
-			));
+			   });
+            parent::__construct($lookup);
 		} else {
 			parent::__construct($lookup);
 		}

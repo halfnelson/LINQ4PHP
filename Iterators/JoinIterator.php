@@ -1,6 +1,10 @@
 <?php
 
-namespace LINQ4PHP\Iterators;class JoinIterator extends DelayedExecutionIterator {
+namespace LINQ4PHP\Iterators;
+
+use LINQ4PHP\LINQ;
+
+class JoinIterator extends DelayedExecutionIterator {
 	private $lookup;
 	
 	private $keyselectouter;
@@ -14,7 +18,7 @@ namespace LINQ4PHP\Iterators;class JoinIterator extends DelayedExecutionIterator
 		if ($jointo instanceof LinqIterator) {
 			$this->jointo = $jointo;
 		} else {
-			$this->jointo = new LinqIterator($jointo);
+			$this->jointo = LINQ::From($jointo);
 		}
 		
 		$this->keyselectouter = $keyselectouter;
@@ -30,9 +34,9 @@ namespace LINQ4PHP\Iterators;class JoinIterator extends DelayedExecutionIterator
 		$lookup = $this->jointo->ToLookup($this->keyselectjoin,NULL,$this->ismatch);
 		$outerkeyselector = $this->keyselectouter;
 		$resultselector = $this->resultselect;
-		$iter = $this->aiterator->SelectMany(
-							function($o) use ($lookup,$outerkeyselector) { return $lookup[call_user_func_array($outerkeyselector,array($o))];}, 
-                            $resultselector); 
+        $iter = new \RecursiveIteratorIterator(new SelectManyIterator($this->aiterator,
+                            function($o) use ($lookup,$outerkeyselector) { return $lookup[call_user_func_array($outerkeyselector,array($o))];},
+                            $resultselector));
         //append our iterator to the previous empty one
         //$this->iterator = $iter;
         parent::__construct($iter);

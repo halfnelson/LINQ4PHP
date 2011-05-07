@@ -15,9 +15,15 @@ spl_autoload_register('LINQ4PHP\Loader');
 
 
 class LINQ {
-	
+	public static function From(&$traversable) {
+        $ia = Iterators\LinqIterator::asIteratorAggregate($traversable);
+        return new Iterators\LinqIterator(function () use ($ia) { return $ia->getIterator(); });
+    }
+
+
 	public static function Linq($traversable) {
-		return new Iterators\LinqIterator($traversable);
+        $ia = Iterators\LinqIterator::asIteratorAggregate($traversable);
+        return new Iterators\LinqIterator(function () use ($ia) { return $ia->getIterator(); });
 	}
 
 }

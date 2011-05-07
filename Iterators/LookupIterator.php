@@ -54,9 +54,9 @@ class LookupIterator extends \IteratorIterator implements \ArrayAccess {
 		
 		$this->buildlookup($iterator);
 		//build our lookup array and pass to our parent.		
-		parent::__construct($this->lookup);
+		parent::__construct(new \ArrayIterator($this->lookup));
 	}
-	
+
 	public function Count($wherefunc = NULL) {
 		if (!$wherefunc) {
             return count($this->lookup);

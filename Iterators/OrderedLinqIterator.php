@@ -1,20 +1,19 @@
 <?php
 namespace LINQ4PHP\Iterators;
 
-// TODO: Only call keyselector once per item. May get called heaps by usort 
-
 use \LINQ4PHP;
 
-class OrderedLinqIterator extends DelayedExecutionIterator {
+class OrderedLinqIterator extends LinqIterator {
 	private $currentcomparer;
 	private $currentkeyselector;
 	private $source;
 	
-	public function __construct($source, $keyselector, $comparer) {
+	public function __construct(LinqIterator $source, $keyselector, $comparer) {
 		$this->source = $source;
 		$this->currentcomparer = $comparer;
 		$this->currentkeyselector = $keyselector;
 		//call parent::__Construct later.
+        parent::__construct($this);
 	}
 	
 	public static function getComparer($comparer, $descending) {
@@ -24,30 +23,33 @@ class OrderedLinqIterator extends DelayedExecutionIterator {
 		}
 		return $newcomparer;
 	}
-	
-	public function firstrun() {
-		
-		//construct sorted iterator
+
+   
+    public function getIterator()
+    {
+        //construct sorted iterator
 		//data as array
 		$data = $this->source->ToArray();
-		$datalen = count($data);
-		$keys = array();
+
 		//keys precalced as array
+        $keys = array();
 		foreach ($data as $v) {
 			$keys[] = call_user_func_array($this->currentkeyselector,array($v));
 		}
-		
-		
+
 		//sort keys
 		uasort($keys,array($this->currentcomparer,'Compare'));
-		
+
 		//map key order onto data order
 		$newdata = array();
 		foreach ($keys as $k=>$v) {
 			$newdata[] = $data[$k];
 		}
-		parent::__construct(new LinqIterator($newdata));
-	}
+		return new \ArrayIterator($newdata);
+    }
+
+
+
 	
 	private function CreateOrderedLinqIterator($keyselector,$comparer,$descending) {
 		//create new comparer
@@ -64,7 +66,7 @@ class OrderedLinqIterator extends DelayedExecutionIterator {
 	    					     call_user_func_array($keyselector,array($element)));
 	    };
 
-	    //return new iterator, ophaning this one.
+	    //return new iterator, orphaning this one.
 		return new OrderedLinqIterator($this->source, $newkeyselector, $newcomparer);
 	}
 	

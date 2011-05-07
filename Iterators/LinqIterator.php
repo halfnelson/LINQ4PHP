@@ -1,6 +1,7 @@
 <?php
 namespace LINQ4PHP\Iterators;
 
+use LINQ4PHP\LINQ;
 class LinqIterator implements \IteratorAggregate {
 
     /**
@@ -22,6 +23,15 @@ class LinqIterator implements \IteratorAggregate {
             return new NaiveIteratorAggregate($traversable);
         }
     }
+    public static function getTraversableAsIterator(&$traversable) {
+        if ($traversable instanceof \IteratorAggregate) {
+            return $traversable->getIterator();
+        } elseif ($traversable instanceof \Iterator) {
+            return $traversable;
+        } elseif (is_array($traversable)) {
+            return new \ArrayIterator($traversable);
+        }
+    }
 
 
     public function getIterator()
@@ -30,9 +40,9 @@ class LinqIterator implements \IteratorAggregate {
         return $itfunc();
     }
 
-    public function __construct(&$iterator)	{
-        $from = self::asIteratorAggregate($iterator);
-        $this->getIteratorFunction = function () use ($from) { return $from->getIterator();};
+    public function __construct($iteratorfunc)	{
+        
+        $this->getIteratorFunction = $iteratorfunc;
 	}
 		
 	public function PrintAll() {
@@ -43,35 +53,34 @@ class LinqIterator implements \IteratorAggregate {
 	
 	
 	public function SelectMany($collectionSelector, $resultSelector = NULL) {
-		
 		$currentiterfunc = $this->getIteratorFunction;
-		$this->getIteratorFunction = function() use ($currentiterfunc,$collectionSelector,$resultSelector) { return new \RecursiveIteratorIterator(new SelectManyIterator($currentiterfunc(), $collectionSelector,$resultSelector)); };
-        return $this;
+		$newiterfunc = function() use ($currentiterfunc,$collectionSelector,$resultSelector) { return new \RecursiveIteratorIterator(new SelectManyIterator($currentiterfunc(), $collectionSelector,$resultSelector)); };
+        return new LinqIterator($newiterfunc);
 	}
 	
 	public function Where($wherefunc) {
         $currentiterfunc = $this->getIteratorFunction;
-        $this->getIteratorFunction = function() use ($currentiterfunc,$wherefunc) { return new WhereIterator($currentiterfunc(), $wherefunc); };
-        return $this;
+        $newiterfunc = function() use ($currentiterfunc,$wherefunc) { return new WhereIterator($currentiterfunc(), $wherefunc); };
+        return new LinqIterator($newiterfunc);
 	}
 	
 	public function Select($selector) {
         $currentiterfunc = $this->getIteratorFunction;
-		$this->getIteratorFunction = function() use ($currentiterfunc,$selector) { return new TransformIterator($currentiterfunc(), $selector); };
-        return $this;
+		$newiterfunc = function() use ($currentiterfunc,$selector) { return new TransformIterator($currentiterfunc(), $selector); };
+        return new LinqIterator($newiterfunc);
 	}
 	
 	public static function Range($start, $count) {
-        return new LinqIterator(new RangeIterator($start, $count));
+        return LINQ::Linq(new RangeIterator($start, $count));
 	}
 	/*
 	 * in MS Linq this is Empty, Empty is reserved in PHP
 	 */
 	public static function EmptyList() {
-		return new LinqIterator(new \EmptyIterator());
+		return LINQ::Linq(new \EmptyIterator());
 	}
 	public static function Repeat($value,$count) {
-		return new LinqIterator(new RepeatedValueIterator($value, $count));
+		return LINQ::Linq(new RepeatedValueIterator($value, $count));
 	}
 	
 	public function Count($wherefunc = NULL) {
@@ -92,12 +101,12 @@ class LinqIterator implements \IteratorAggregate {
 	
 	public function Concat($list) {
         $currentiterfunc = $this->getIteratorFunction;
-		$this->getIteratorFunction = function() use ($currentiterfunc,$list) {
+		$newiterfunc = function() use ($currentiterfunc,$list) {
                 $concatarr = array($currentiterfunc(),$list);
-        		$newlist = new LinqIterator($concatarr);
+        		$newlist = LINQ::Linq($concatarr);
 		        return $newlist->SelectMany(function($i){return $i;});
                };
-        return $this;
+        return new LinqIterator($newiterfunc);
 	}
 	
 	public function Aggregate($aggfunc) {
@@ -190,11 +199,11 @@ class LinqIterator implements \IteratorAggregate {
    
 	public function Distinct($comparefunc = NULL) {
 		$currentiterfunc = $this->getIteratorFunction;
-        $this->getIteratorFunction =
+        $newiterfunc =
             function() use ($currentiterfunc,$comparefunc) {
                 return new DistinctIterator($currentiterfunc(),$comparefunc);
             };
-        return $this;
+        return new LinqIterator($newiterfunc);
 
 	}
 
@@ -204,52 +213,93 @@ class LinqIterator implements \IteratorAggregate {
 	
 	public function Intersect($list,$comparefunc = NULL) {
         $currentiterfunc = $this->getIteratorFunction;
-        $this->getIteratorFunction =
+        $newiterfunc =
             function() use ($currentiterfunc,$list,$comparefunc) {
         		return new IntersectIterator($currentiterfunc(), $list,$comparefunc);
             };
-        return $this;
+        return new LinqIterator($newiterfunc);
 	}
 	
 	public function Except($list,$comparefunc = NULL) {
         $currentiterfunc = $this->getIteratorFunction;
-        $this->getIteratorFunction =
+        $newiterfunc =
             function() use ($currentiterfunc,$list,$comparefunc) {
                 return new ExceptIterator($currentiterfunc(), $list, $comparefunc);
             };
-        return $this;
+        return new LinqIterator($newiterfunc);
 	}
-	//TODO: got to here!
+
 	public function ToLookup($keyselect, $elementselect = NULL, $comparer = NULL) {
-		return new LookupIterator($this, $keyselect,$elementselect, $comparer);
+	    return new LookupIterator($this->getIterator(), $keyselect,$elementselect, $comparer);
 	}
 	
 	public function Join($list, $keyselectouter, $keyselectinner,$resultselect,$comparer = NULL) {
-		return new JoinIterator($this,$list, $keyselectouter, $keyselectinner, $resultselect,$comparer);	
+        $currentiterfunc = $this->getIteratorFunction;
+        $newiterfunc =
+            function() use ($currentiterfunc,$list,$keyselectouter,$keyselectinner,$resultselect,$comparer) {
+	    		return new JoinIterator($currentiterfunc(),$list, $keyselectouter, $keyselectinner, $resultselect,$comparer);
+            };
+        return new LinqIterator($newiterfunc);
+                
 	}
 	
 	public function GroupBy($keyselect,$elementselect=null , $resultselect = null,$comparer = null) {
-		return new GroupByIterator($this, $keyselect,$elementselect,$resultselect,$comparer);
+        $currentiterfunc = $this->getIteratorFunction;
+        $newiterfunc =
+            function() use ($currentiterfunc,$keyselect,$elementselect,$resultselect,$comparer) {
+        		return new GroupByIterator($currentiterfunc(), $keyselect,$elementselect,$resultselect,$comparer);
+            };
+        return new LinqIterator($newiterfunc);
+
 	}
 	
 	public function GroupJoin($jointo,$keyselectouter,$keyselectinner,$resultselect,$comparer = null) {
-		return new GroupJoinIterator($this, $jointo, $keyselectouter, $keyselectinner, $resultselect,$comparer);
+        $currentiterfunc = $this->getIteratorFunction;
+        $newiterfunc =
+            function() use ($currentiterfunc,$jointo,$keyselectouter,$keyselectinner,$resultselect,$comparer) {
+                return new GroupJoinIterator($currentiterfunc(), $jointo, $keyselectouter, $keyselectinner, $resultselect,$comparer);
+            };
+        return new LinqIterator($newiterfunc);
+
 	}
 	
 	public function TakeWhile($predicate) {
-		return new TakeWhileIterator($this, $predicate);
+        $currentiterfunc = $this->getIteratorFunction;
+        $newiterfunc =
+            function() use ($currentiterfunc,$predicate) {
+    			return new TakeWhileIterator($currentiterfunc(), $predicate);
+            };
+        return new LinqIterator($newiterfunc);
 	}
 	
 	public function Take($count) {
-		return new TakeWhileIterator($this, function($val,$idx) use ($count) { return $idx < $count; });
+        $currentiterfunc = $this->getIteratorFunction;
+        $newiterfunc =
+            function() use ($currentiterfunc,$count) {
+        		return new TakeWhileIterator($currentiterfunc(), function($val,$idx) use ($count) { return $idx < $count; });
+            };
+        return new LinqIterator($newiterfunc);
+
 	}
 	
 	public function SkipWhile($predicate) {
-		return new SkipWhileIterator($this, $predicate);
+        $currentiterfunc = $this->getIteratorFunction;
+        $newiterfunc =
+            function() use ($currentiterfunc,$predicate) {
+                return new SkipWhileIterator($currentiterfunc(), $predicate);
+            };
+        return new LinqIterator($newiterfunc);
+
 	}
 	
 	public function Skip($count) {
-		return new SkipWhileIterator($this, function($val,$idx) use ($count) { return $idx < $count;} );
+        $currentiterfunc = $this->getIteratorFunction;
+        $newiterfunc =
+            function() use ($currentiterfunc,$count) {
+    			return new SkipWhileIterator($currentiterfunc(), function($val,$idx) use ($count) { return $idx < $count;} );
+            };
+        return new LinqIterator($newiterfunc);
+
 	}
 	
 	public function ToArray() {
@@ -269,15 +319,20 @@ class LinqIterator implements \IteratorAggregate {
 	}
 	
 	public function OrderBy($keyselector, $comparer = null) {
-		return new OrderedLinqIterator($this, $keyselector, OrderedLinqIterator::getComparer($comparer,false));
-	}
+        return new OrderedLinqIterator($this, $keyselector, OrderedLinqIterator::getComparer($comparer,false));
+ 	}
 	
 	public function OrderByDescending($keyselector, $comparer = null) {
-		return new OrderedLinqIterator($this, $keyselector, OrderedLinqIterator::getComparer($comparer,true));
-	}
+        return new OrderedLinqIterator($this, $keyselector, OrderedLinqIterator::getComparer($comparer,true));
+    }
 	
 	public function Reverse() {
-		return new ReverseIterator($this);
+        $currentiterfunc = $this->getIteratorFunction;
+        $newiterfunc =
+            function() use ($currentiterfunc) {
+	        	return new ReverseIterator($currentiterfunc());
+            };
+        return new LinqIterator($newiterfunc);
 	}
 	
 	public function Sum($elementselect = null) {
@@ -341,19 +396,19 @@ class LinqIterator implements \IteratorAggregate {
 		}
 	}
 	
-	//TODO: Optimise for this implementing array access
 	private function GetElementAt($index) {
-		$this->rewind();
+		$it = $this->getIterator();
+        $it->rewind();
 		for ($i = 1; $i <= $index; $i++ ) {
-			if (!$this->valid()) {
+			if (!$it->valid()) {
 				return FALSE;
 			}
-			$this->next();
+			$it->next();
 		}	
-		if (!$this->valid()) {
+		if (!$it->valid()) {
 			return FALSE;
 		} else {
-			return array($this->current());
+			return array($it->current());
 		}
 	}
 	
@@ -388,11 +443,7 @@ class LinqIterator implements \IteratorAggregate {
 		return $contains;
 	}
 	public function SequenceEqual($iterator, $comparer = null) {
-	  if(is_array($iterator)) {
-	  	$it2= new \ArrayIterator($iterator);
-	  } else {
-	  	$it2 = $iterator;
-	  }
+	  $it2 = self::getTraversableAsIterator($iterator);
       $it2->rewind();
 	  foreach ($this as $it) {	
 	  		if ($comparer) {
@@ -411,8 +462,12 @@ class LinqIterator implements \IteratorAggregate {
 	}
 	
 	public function Zip($list,$resultfunc) {
-		
-		return new LinqIterator(new ZipIterator($this, $list, $resultfunc));
+		$currentiterfunc = $this->getIteratorFunction;
+        $newiterfunc =
+            function() use ($currentiterfunc,$list,$resultfunc) {
+		        return new ZipIterator($currentiterfunc(), $list, $resultfunc);
+            };
+        return new LinqIterator($newiterfunc);
 	}
 	
 }

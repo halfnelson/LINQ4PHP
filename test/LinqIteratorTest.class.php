@@ -380,4 +380,10 @@ class LinqIteratorTest extends PHPUnit_Framework_TestCase {
 		$i = $a->Zip($b,function($i,$j) {return $i+$j; });
 		$this->AssertIteratorsEqual(array(2,4,6,8,10), $i);
 	}
+
+    public function testSelfReference() {
+        $a = LINQ::Linq(array(1,2,3,4,5));
+        $i = $a->Zip($a,function($i,$j) {return $i.":".$j;});
+        $this->AssertIteratorsEqual($i,array("1:1","2:2","3:3","4:4","5:5"));
+    }
 }

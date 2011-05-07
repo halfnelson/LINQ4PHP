@@ -8,7 +8,7 @@ class ZipIterator extends \IteratorIterator {
 	public function __construct($it1,$it2,$resultfunc) {
 		$this->resultfunc = $resultfunc;
 		parent::__construct($it1);
-		$this->it2 = $it2;
+		$this->it2 = LinqIterator::getTraversableAsIterator($it2);
 	}
 	public function rewind() {
 		parent::rewind();
@@ -27,8 +27,6 @@ class ZipIterator extends \IteratorIterator {
 	public function current() {
 		$it1 = parent::current();
 		$it2 = $this->it2->current();
-		//print_r($its);
-		//var_dump($this->resultfunc);
 		return call_user_func_array($this->resultfunc,array($it1,$it2));
 	}
 	

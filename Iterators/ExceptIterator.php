@@ -1,12 +1,14 @@
 <?php
 namespace LINQ4PHP\Iterators;
+
+use LINQ4PHP\LINQ;
 class ExceptIterator extends DistinctIterator {
 	private $secondlist;
 	private $secondlistread = FALSE;
 	
 	function __construct($iterator, $list, $comparefunc=NULL) {
 		if (!$list instanceof LinqIterator) {
-			$this->secondlist = new LinqIterator($list);
+			$this->secondlist = LINQ::From($list);
 		} else {
 			$this->secondlist = $list;
 		}

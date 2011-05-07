@@ -1,5 +1,7 @@
 <?php
 namespace LINQ4PHP\Iterators;
+
+use LINQ4PHP\LINQ;
 class GroupJoinIterator extends DelayedExecutionIterator {
 	private $lookup;
 	
@@ -14,7 +16,7 @@ class GroupJoinIterator extends DelayedExecutionIterator {
 		if ($jointo instanceof LinqIterator) {
 			$this->jointo = $jointo;
 		} else {
-			$this->jointo = new LinqIterator($jointo);
+			$this->jointo = LINQ::From($jointo);
 		}
 		$this->keyselectouter = $keyselectouter;
 		$this->keyselectjoin = $keyselectjoin;
