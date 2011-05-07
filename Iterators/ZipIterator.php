@@ -1,7 +1,7 @@
 <?php
 namespace LINQ4PHP\Iterators;
 
-class ZipIterator extends LinqIterator {
+class ZipIterator extends \IteratorIterator {
 	private $resultfunc;
 	private $it2;
 	

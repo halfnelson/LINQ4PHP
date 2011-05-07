@@ -1,7 +1,7 @@
 <?php
 namespace LINQ4PHP\Iterators;
 
-class TransformIterator extends LinqIterator {
+class TransformIterator extends \IteratorIterator {
 	private $atransform;
     function __construct($iterator, $transformfunc) {
 		parent::__construct($iterator);

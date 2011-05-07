@@ -18,7 +18,7 @@ class SelectManyIterator extends TransformIterator  implements \RecursiveIterato
 			return new SelectManyLeafIterator(new Iterator_Array($val),$this->currentRaw(),$this->resultselector);
 		}
 		if (!($val instanceof \Iterator)) {
-			throw new \Exception('Select Many transform function does not return iterator or array');
+			throw new \Exception('Select Many transform function does not return iterator or array:'.get_class($val));
 		} else {
 			return new SelectManyLeafIterator($val,$this->currentRaw(),$this->resultselector);
 		}

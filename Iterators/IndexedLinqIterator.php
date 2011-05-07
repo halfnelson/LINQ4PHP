@@ -1,6 +1,6 @@
 <?php
 namespace LINQ4PHP\Iterators;
-class IndexedLinqIterator extends LinqIterator {
+class IndexedLinqIterator extends \IteratorIterator {
 	protected $index;
 	function __construct($iterator) {
 		parent::__construct($iterator);

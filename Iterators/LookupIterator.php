@@ -3,7 +3,7 @@ namespace LINQ4PHP\Iterators;
 
 
 
-class LookupIterator extends LinqIterator implements \ArrayAccess {
+class LookupIterator extends \IteratorIterator implements \ArrayAccess {
 	private $getkey;
 	private $getelement;
 	private $lookup;

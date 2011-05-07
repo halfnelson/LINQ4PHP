@@ -1,7 +1,7 @@
 <?php
 
 namespace LINQ4PHP\Iterators;
-class SelectManyLeafIterator extends LinqIterator implements \RecursiveIterator {
+class SelectManyLeafIterator extends \IteratorIterator implements \RecursiveIterator {
 	private $resultselector;
 	private $aparent;
 	function __construct($iterator, $aparent, $resultfunc = NULL) {

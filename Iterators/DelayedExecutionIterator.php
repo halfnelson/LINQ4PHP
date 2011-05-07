@@ -1,7 +1,7 @@
 <?php
 namespace LINQ4PHP\Iterators;
 
-abstract class DelayedExecutionIterator extends LinqIterator {
+abstract class DelayedExecutionIterator extends \IteratorIterator {
 	private $isfirstrun = TRUE;
 	protected abstract function firstrun() ;
 	

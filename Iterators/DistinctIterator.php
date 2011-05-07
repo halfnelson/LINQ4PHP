@@ -1,7 +1,7 @@
 <?php
 namespace LINQ4PHP\Iterators;
 
-class DistinctIterator extends LinqIterator {
+class DistinctIterator extends \IteratorIterator {
 	public $ismatch;
 	protected $seen = array();
 	function __construct($iterator, $comparefunc= NULL) {

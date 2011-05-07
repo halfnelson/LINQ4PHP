@@ -9,13 +9,21 @@ use \LINQ4PHP\Iterators\LinqIterator;
 
 
 class LinqIteratorTest extends PHPUnit_Framework_TestCase {
-	private function AssertIteratorsEqual($it1,$it2) {
-	  if(is_array($it1)) {
-	  	$it1 = new ArrayIterator($it1);
-	  }
-	  if(is_array($it2)) {
-	  	$it2 = new ArrayIterator($it2);
-	  }
+	private function asIterator($trav) {
+      if ($trav instanceof \Iterator) {
+          return $trav;
+      } elseif($trav instanceof \IteratorAggregate) {
+          return $trav->getIterator();
+      } elseif(is_array($trav)) {
+	  	return new ArrayIterator($trav);
+      }
+    }
+
+
+    private function AssertIteratorsEqual($it1,$it2) {
+
+	  	$it1 = $this->asIterator($it1);
+        $it2 = $this->asIterator($it2);
 	  
 	  
       $it2->rewind();
