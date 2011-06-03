@@ -11,8 +11,7 @@ class ThenByComparer extends BaseComparer {
 		$this->thenby = self::AsIComparer($thenby);
 	}
 
-	public function Compare($x,$y) {
-		
+	public function Compare($x, $y) {
 		$orderresult = parent::Compare($x->getOrderByKey(),$y->getOrderByKey());
 		 							   
 		//only use thenby if the the orderby elements are the same.

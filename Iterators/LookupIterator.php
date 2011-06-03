@@ -22,8 +22,8 @@ class LookupIterator extends \IteratorIterator implements \ArrayAccess {
 				if (call_user_func_array($this->ismatch,array($key,$lk))) {
 					return array(true,$lk);
 				}
-				return array(false,$key);
 			}
+            return array(false,$key);
 		}
 	}
 	
@@ -80,8 +80,8 @@ class LookupIterator extends \IteratorIterator implements \ArrayAccess {
 		return $this->lookup[$key]; 
 	}
     
-	public function offsetSet (  $offset ,$value ) { throw new Exception("Cannot modify a LookupIterator via array");}
-    public function offsetUnset ( $offset ) { throw new Exception("Cannot modify a LookupIterator via array");}
+	public function offsetSet (  $offset ,$value ) { throw new \Exception("Cannot modify a LookupIterator via array");}
+    public function offsetUnset ( $offset ) { throw new \Exception("Cannot modify a LookupIterator via array");}
 	
 	
 }

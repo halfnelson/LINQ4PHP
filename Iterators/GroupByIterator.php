@@ -1,7 +1,7 @@
 <?php
 namespace LINQ4PHP\Iterators;
 class GroupByIterator extends DelayedExecutionIterator {
-	private $lookup;
+
 	
 	private $keyselect;
 	private $elementselect;
@@ -21,7 +21,7 @@ class GroupByIterator extends DelayedExecutionIterator {
 		$lookup = new LookupIterator($this->aiterator,$this->keyselect,$this->elementselect,$this->ismatch);
 		if ($this->resultselect) {
 			$resultsel = $this->resultselect;
-			$lookup = new TransformIterator($lookup,function($group) use ($resultsel) {
+			$lookup = new TransformIterator($lookup,function(GroupIterator $group) use ($resultsel) {
 			   	   return call_user_func_array($resultsel,array($group->groupkey,$group));
 			   });
             parent::__construct($lookup);

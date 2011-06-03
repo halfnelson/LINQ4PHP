@@ -1,7 +1,7 @@
 <?php
 namespace LINQ4PHP\Iterators;
 
-use \LINQ4PHP;
+use LINQ4PHP\Comparers,LINQ4PHP;
 
 class OrderedLinqIterator extends LinqIterator {
 	private $currentcomparer;
@@ -17,9 +17,9 @@ class OrderedLinqIterator extends LinqIterator {
 	}
 	
 	public static function getComparer($comparer, $descending) {
-		$newcomparer = LINQ4PHP\Comparers\BaseComparer::AsIComparer($comparer);
+		$newcomparer =  \LINQ4PHP\Comparers\BaseComparer::AsIComparer($comparer);
 		if ($descending) {
-			$newcomparer = new LINQ4PHP\Comparers\DescendingComparer($newcomparer);
+			$newcomparer = new \LINQ4PHP\Comparers\DescendingComparer($newcomparer);
 		}
 		return $newcomparer;
 	}

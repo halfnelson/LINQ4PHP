@@ -9,7 +9,7 @@ class GroupJoinIterator extends DelayedExecutionIterator {
 	private $keyselectjoin;
 	private $resultselect;
 	private $jointo;
-	private $aiterator;
+
 	private $ismatch;
 	
 	function __construct($iterator,$jointo, $keyselectouter,$keyselectjoin,$resultselect, $comparefunc = NULL) {

@@ -5,7 +5,7 @@ namespace LINQ4PHP\Iterators;
 use LINQ4PHP\LINQ;
 
 class JoinIterator extends DelayedExecutionIterator {
-	private $lookup;
+
 	
 	private $keyselectouter;
 	private $keyselectjoin;
